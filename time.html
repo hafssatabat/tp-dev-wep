@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #6e707f;
+      color: #eee6d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background-color: #5a5c6b;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      color: #d2d8e8;
+      margin-bottom: 20px;
+    }
+    .timer {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+    .buttons button {
+      background-color: #d2d8e8;
+      color: #6e707f;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+    .buttons button:hover {
+      background-color: #eee6d9;
+    }
+    .buttons button:disabled {
+      background-color: #a0a2b0;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pomodoro Timer</h1>
+    <div class="timer" id="timer">25:00</div>
+    <div class="buttons">
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn" disabled>Pause</button>
+      <button id="resetBtn" disabled>Reset</button>
+    </div>
+  </div>
+
+  <script>
+    let timerInterval;
+    let timeLeft = 25 * 60; // 25 minutes en secondes
+    let isPaused = true;
+
+    const timerDisplay = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // Fonction pour mettre à jour l'affichage du timer
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // Fonction pour démarrer le timer
+    function startTimer() {
+      if (isPaused) {
+        isPaused = false;
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateTimer();
+          } else {
+            clearInterval(timerInterval);
+            alert(timeLeft === 0 ? "Time's up! Take a 5-minute break!" : "Break's over! Back to work!");
+            if (timeLeft === 0) {
+              timeLeft = 5 * 60; // 5 minutes de pause
+            } else {
+              timeLeft = 25 * 60; // 25 minutes de travail
+            }
+            updateTimer();
+            startTimer(); // Redémarre automatiquement
+          }
+        }, 1000);
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        resetBtn.disabled = false;
+      }
+    }
+
+    // Fonction pour mettre en pause le timer
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      isPaused = true;
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+    }
+
+    // Fonction pour réinitialiser le timer
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 25 * 60; // Réinitialise à 25 minutes
+      isPaused = true;
+      updateTimer();
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = true;
+    }
+
+    // Événements pour les boutons
+    startBtn.addEventListener('click', startTimer);
+    pauseBtn.addEventListener('click', pauseTimer);
+    resetBtn.addEventListener('click', resetTimer);
+
+    // Initialisation du timer
+    updateTimer();
+  </script>
+</body>
+</html>
