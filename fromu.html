@@ -1,0 +1,178 @@
+<?php
+// Connexion à la base de données
+$host = 'localhost';
+$dbname = 'test_db';
+$user = 'root';
+$password = '';
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
+}
+
+// Traitement du formulaire
+$message = '';
+$messageType = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nom = htmlspecialchars(trim($_POST['nom']));
+    $email = htmlspecialchars(trim($_POST['email']));
+    $password = htmlspecialchars(trim($_POST['password']));
+    $telephone = htmlspecialchars(trim($_POST['telephone']));
+    $adresse = htmlspecialchars(trim($_POST['adresse']));
+    $naissance = htmlspecialchars(trim($_POST['naissance']));
+
+    if (!empty($nom) && !empty($email) && !empty($password) && !empty($telephone) && !empty($adresse) && !empty($naissance)) {
+        try {
+            $stmt = $conn->prepare("INSERT INTO utilisateurs (nom, email, mot_de_passe, telephone, adresse, naissance) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$nom, $email, $password, $telephone, $adresse, $naissance]);
+            $message = "✅ Inscription réussie !";
+            $messageType = "success";
+        } catch (PDOException $e) {
+            $message = "❌ Erreur lors de l'enregistrement.";
+            $messageType = "error";
+        }
+    } else {
+        $message = "⚠️ Veuillez remplir tous les champs.";
+        $messageType = "error";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulaire d'inscription</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+        }
+
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .form-container {
+            background: #ffffff;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(-20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="tel"]:focus,
+        input[type="date"]:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px #007bff44;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media screen and (max-width: 500px) {
+            .form-container {
+                margin: 0 20px;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="form-container">
+            <h2>Inscription</h2>
+            <form method="POST">
+                <input type="text" name="nom" placeholder="Nom complet" required>
+                <input type="email" name="email" placeholder="Adresse email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
+                <input type="tel" name="telephone" placeholder="Téléphone" required>
+                <input type="text" name="adresse" placeholder="Adresse" required>
+                <input type="date" name="naissance" required>
+                <input type="submit" value="Envoyer">
+            </form>
+
+            <?php if (!empty($message)): ?>
+                <div class="message <?= $messageType ?>">
+                    <?= $message ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</body>
+</html>
